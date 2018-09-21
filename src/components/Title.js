@@ -1,6 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
+
 import { withStyles } from '@material-ui/core/styles';
 import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
@@ -8,7 +9,7 @@ import Typography from '@material-ui/core/Typography';
 import IconButton from '@material-ui/core/IconButton';
 import MenuIcon from '@material-ui/icons/Menu';
 
-import { drawerWidth } from '../constants/style.js';
+import { drawerWidth } from '../constants/constants.js';
 
 const styles = theme => ({
   appBar: {
@@ -66,7 +67,7 @@ Title.propTypes = {
   classes: PropTypes.object.isRequired,
   theme: PropTypes.object.isRequired,
   menuOpen: PropTypes.bool,
-  title: PropTypes.string,
+  title: PropTypes.string.isRequired,
   handleMenuOpen: PropTypes.func.isRequired
 };
 

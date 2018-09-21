@@ -1,18 +1,18 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { connect } from 'react-redux';
-import { withStyles } from '@material-ui/core/styles';
-
 import classNames from 'classnames';
 import compose from 'recompose/compose';
+
+import { connect } from 'react-redux';
 import  { getChuck }  from '../actions/mocks.actions';
+
+import { withStyles } from '@material-ui/core/styles';
 
 import Title from '../components/Title';
 import Menu from '../components/Menu';
-import Typography from '@material-ui/core/Typography';
+import Map from '../containers/Map';
 
-
-import { drawerWidth, title } from '../constants/style.js';
+import { drawerWidth, title } from '../constants/constants.js';
 
 const styles = theme => ({
   appFrame: {
@@ -70,7 +70,7 @@ class App extends React.Component {
   handleMenuClose () {
     this.setState({ menuOpen: false });
   }
-
+  // <Typography>{this.props.quote}</Typography>
   render () {
     return (
       <div className={this.props.classes.appFrame}>
@@ -90,7 +90,7 @@ class App extends React.Component {
             })}
         >
           <div className={this.props.classes.drawerHeader} />
-          <Typography>{this.props.quote}</Typography>
+          <Map />
         </main>
       </div>
     );

@@ -7,16 +7,23 @@ import Divider from '@material-ui/core/Divider';
 import IconButton from '@material-ui/core/IconButton';
 import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
 
-
+import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
-import InboxIcon from '@material-ui/icons/MoveToInbox';
-import DraftsIcon from '@material-ui/icons/Drafts';
-import StarIcon from '@material-ui/icons/Star';
-import SendIcon from '@material-ui/icons/Send';
+import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
+import ListSubheader from '@material-ui/core/ListSubheader';
 
-import { drawerWidth } from '../constants/style.js';
+import Switch from '@material-ui/core/Switch';
+import LayersIcon from '@material-ui/icons/LayersOutlined';
+import GPSNotFixedIcon from '@material-ui/icons/GpsNotFixedOutlined';
+import MyLocationIcon from '@material-ui/icons/MyLocationOutlined';
+import PinDropIcon from '@material-ui/icons/PinDropOutlined';
+import WalkIcon from '@material-ui/icons/DirectionsWalkOutlined';
+import NetworkIcon from '@material-ui/icons/DeviceHubOutlined';
+import PhotoCameraIcon from '@material-ui/icons/PhotoCameraOutlined';
+
+import { drawerWidth } from '../constants/constants.js';
 
 const styles = theme => ({
   drawerPaper: {
@@ -32,7 +39,13 @@ const styles = theme => ({
   }
 });
 
-function Title (props) {
+function Menu (props) {
+
+  // Heatmap switch
+  // Coordinates
+  // Point A Coordinates
+  // Point B Coordinates
+  //
 
   return (
     <Drawer
@@ -49,43 +62,82 @@ function Title (props) {
         </IconButton>
       </div>
       <Divider />
-      <ListItem button>
-        <ListItemIcon>
-          <InboxIcon />
-        </ListItemIcon>
-        <ListItemText primary="Inbox" />
-      </ListItem>
-      <ListItem button>
-        <ListItemIcon>
-          <StarIcon />
-        </ListItemIcon>
-        <ListItemText primary="Starred" />
-      </ListItem>
-      <ListItem button>
-        <ListItemIcon>
-          <SendIcon />
-        </ListItemIcon>
-        <ListItemText primary="Send mail" />
-      </ListItem>
-      <ListItem button>
-        <ListItemIcon>
-          <DraftsIcon />
-        </ListItemIcon>
-        <ListItemText primary="Drafts" />
-      </ListItem>
+      <List subheader={<ListSubheader>Coordinates</ListSubheader>} dense={true}>
+        <ListItem>
+          <ListItemText primary="42.8456 N | 2.8456 E | Zoom 16.3" />
+        </ListItem>
+      </List>
+      <Divider />
+      <List subheader={<ListSubheader>Routing</ListSubheader>} dense={true}>
+        <ListItem button>
+          <ListItemIcon>
+            <MyLocationIcon />
+          </ListItemIcon>
+          <ListItemText primary="Point A" />
+        </ListItem>
+        <ListItem>
+          <ListItemIcon>
+            <WalkIcon />
+          </ListItemIcon>
+          <ListItemText primary="ETA: 23min" />
+        </ListItem>
+        <ListItem>
+          <ListItemIcon>
+            <PhotoCameraIcon />
+          </ListItemIcon>
+          <ListItemText primary="17 interesting places on the way" />
+        </ListItem>
+        <ListItem button>
+          <ListItemIcon>
+            <PinDropIcon />
+          </ListItemIcon>
+          <ListItemText primary="Point B" />
+        </ListItem>
+      </List>
+      <Divider />
+      <List subheader={<ListSubheader>Settings</ListSubheader>} dense={true}>
+        <ListItem button>
+          <ListItemIcon>
+            <GPSNotFixedIcon />
+          </ListItemIcon>
+          <ListItemText primary="Center" />
+        </ListItem>
+        <ListItem>
+          <ListItemIcon>
+            <LayersIcon />
+          </ListItemIcon>
+          <ListItemText primary="Heatmap" />
+          <ListItemSecondaryAction>
+            <Switch
+
+            />
+          </ListItemSecondaryAction>
+        </ListItem>
+        <ListItem>
+          <ListItemIcon>
+            <NetworkIcon />
+          </ListItemIcon>
+          <ListItemText primary="Delaunay Trigangulation" />
+          <ListItemSecondaryAction>
+            <Switch
+
+            />
+          </ListItemSecondaryAction>
+        </ListItem>
+      </List>
     </Drawer>
   );
 }
 
-Title.propTypes = {
+Menu.propTypes = {
   classes: PropTypes.object.isRequired,
   theme: PropTypes.object.isRequired,
   menuOpen: PropTypes.bool,
   handleMenuClose: PropTypes.func.isRequired
 };
 
-Title.defaultProps = {
+Menu.defaultProps = {
   menuOpen: false
 };
 
-export default withStyles(styles, { withTheme: true })(Title);
+export default withStyles(styles, { withTheme: true })(Menu);
