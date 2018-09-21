@@ -1,0 +1,43 @@
+{
+  "name": "scenic-routes-client",
+  "version": "0.0.1",
+  "private": true,
+  "description": "A JavaScript proof-of-concept for getting more interesting walking routes",
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test --env=jsdom",
+    "eject": "react-scripts eject"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/leonhfr/scenic-routes-client"
+  },
+  "keywords": [
+    "scenic",
+    "routes",
+    "flickr"
+  ],
+  "author": {
+    "name": "Leon Hollender",
+    "url": "https://github.com/leonhfr"
+  },
+  "license": "GPL-3.0-or-later",
+  "bugs": {
+    "url": "https://github.com/leonhfr/scenic-routes-client/issues"
+  },
+  "homepage": "https://github.com/leonhfr/scenic-routes-client#readme",
+  "dependencies": {
+    "connected-react-router": "^4.4.1",
+    "history": "^4.7.2",
+    "mapbox-gl": "^0.49.0",
+    "react": "^16.4.2",
+    "react-dom": "^16.4.2",
+    "react-redux": "^5.0.7",
+    "react-router-dom": "^4.3.1",
+    "react-scripts": "1.1.4",
+    "redux": "^4.0.0",
+    "redux-logger": "^3.0.6",
+    "redux-thunk": "^2.3.0"
+  }
+}
