@@ -10,32 +10,33 @@
 //   }
 // }
 
-
-const BASE_URL = 'http://api.icndb.com'; //CHANGE THIS TO SERVER URL
+const BASE_URL = 'http://localhost:3000';
 
 export default store => next => action => {
   if (!action.api) return next(action);
 
+  const defaultHeaders = {};
   const { endpoint, method } = action.api;
   let { body, headers } = action.api;
-
-  const defaultHeaders = {};
 
   if (body) {
     body = JSON.stringify(body);
     defaultHeaders['Content-type'] = 'application/json';
-  }  
+  }
 
   headers = {
     ...defaultHeaders,
     ...headers,
-  }
+  };
 
   next({
     ...action,
     type: `${action.type}_REQUEST`
   });
+
+  //eslint-disable-next-line
   console.log('fetch', BASE_URL + endpoint);
+
   fetch(`${BASE_URL}${endpoint}`, {
     method: method || 'GET',
     body,
@@ -48,7 +49,7 @@ export default store => next => action => {
         type: `${action.type}_SUCCESS`,
         api: undefined,
         data,
-      })
+      });
     })
     .catch(error => {
       store.dispatch({
@@ -56,6 +57,6 @@ export default store => next => action => {
         type: `${action.type}_FAILURE`,
         api: undefined,
         error,
-      })
-    })
-}
+      });
+    });
+};

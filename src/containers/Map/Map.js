@@ -1,13 +1,14 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import { connect } from 'react-redux';
 import mapboxgl from 'mapbox-gl';
 
-import { mapboxglToken, geo } from '../constants/constants.js';
+import { geo } from '../../constants/constants.js';
 
 const lat = geo.GEO_BBOX_BOTTOM + Math.abs(geo.GEO_BBOX_BOTTOM - geo.GEO_BBOX_TOP) / 2;
 const lng = geo.GEO_BBOX_LEFT + Math.abs(geo.GEO_BBOX_LEFT - geo.GEO_BBOX_RIGHT) / 2;
 
-mapboxgl.accessToken = mapboxglToken;
+mapboxgl.accessToken = 'pk.eyJ1IjoibGVvbmhmciIsImEiOiJjam1icjllY3cxbG03M3BudGQzaWs1Zjk5In0.5u5qyMk6oy4MkkZKW3pbGQ';
 
 class Map extends React.Component {
 
@@ -29,6 +30,11 @@ class Map extends React.Component {
       center: [lng, lat],
       zoom
     });
+
+    // disable map rotation using right click + drag
+    map.dragRotate.disable();
+    // disable map rotation using touch rotation gesture
+    map.touchZoomRotate.disableRotation();
 
     map.on('move', () => {
       const { lng, lat } = map.getCenter();
@@ -118,4 +124,20 @@ class Map extends React.Component {
   }
 }
 
-export default Map;
+Map.propTypes = {
+  heatmap: PropTypes.object.isRequired,
+  interests: PropTypes.object.isRequired
+};
+
+const mapStateToProps = (state) => ({
+  heatmap: state.heatmap,
+  interests: state.interests
+});
+
+// const mapDispatchToProps = (dispatch) => ({
+//   getHeatmap: () => dispatch(getHeatmap()),
+//   getInterests: () => dispatch(getInterests())
+// });
+
+export default connect(mapStateToProps)(Map);
+// export default connect(mapStateToProps, mapDispatchToProps)(Map);

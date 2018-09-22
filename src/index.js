@@ -8,18 +8,14 @@ import logger from 'redux-logger';
 import reducers from './reducers';
 import apiClient from './middlewares/api';
 
-import { MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles';
-
-import App from './containers/App';
+import './index.css';
+import App from './containers/App/App';
 
 const store = createStore(reducers, applyMiddleware(apiClient, logger));
-const theme = createMuiTheme();
 
 ReactDOM.render(
   <Provider store={store}>
-    <MuiThemeProvider theme={theme}>
-      <App />
-    </MuiThemeProvider>
+    <App />
   </Provider>, document.getElementById('root')
 );
 

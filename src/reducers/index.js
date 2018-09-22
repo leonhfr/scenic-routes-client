@@ -1,10 +1,10 @@
 import { combineReducers } from 'redux';
 
-import mock from './mock.reducer'
-
+import geojson from './geojson.reducer';
 
 const reducers = combineReducers({
-  mock
+  geojson,
+  // mock
 });
 
 export default reducers;

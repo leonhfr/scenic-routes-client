@@ -1,0 +1,35 @@
+:root {
+  --primary: #cc7b19;
+  --accent: #f9be03;
+  --background-light: #1f1f1f;
+  --background-medium: #1a1a1a;
+  --background-dark: #121212;
+  --text-light: #eeeeee;
+  --text-dark: #848484;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  font-family: Roboto, Helvetica, Arial, sans-serif;
+}
+
+body {
+  background-color: var(--background-medium);
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--background-dark);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--primary);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--accent);
+}
