@@ -1,7 +1,9 @@
 .loader-container {
   display: flex;
+  flex-direction: column;
   justify-content: center;
-  align-content: center;
+  align-items: center;
+  height: 100vh;
 }
 
 .loader-hidden {
@@ -10,4 +12,10 @@
 
 .loader-active {
   display: block;
+}
+
+.loading-data {
+  font-size: 16px;
+  margin-top: 20px;
+  color: var(--text-light);
 }

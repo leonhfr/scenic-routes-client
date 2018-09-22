@@ -1,5 +1,12 @@
 import { namespace } from '../constants/namespace';
 
+export const getBounds = (data) => ({
+  type: namespace.GEOJSON_BOUNDS_GET,
+  api: {
+    endpoint: '/data/bounds.geo.json'
+  }
+});
+
 export const getHeatmap = (data) => ({
   type: namespace.GEOJSON_HEATMAP_GET,
   api: {

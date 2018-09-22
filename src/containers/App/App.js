@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 
 import { connect } from 'react-redux';
-import { getHeatmap, getInterests }  from '../../actions/geojson.actions';
+import { getBounds, getHeatmap, getInterests }  from '../../actions/geojson.actions';
 
 import Map from '../Map/Map';
 import AppBar from '../../components/AppBar/AppBar';
@@ -20,10 +20,10 @@ class App extends React.Component {
   renderContent () {
     if (this.props.heatmapLoaded && this.props.interestsLoaded) {
       return (
-        <Map />
+        <Map className="map" />
       );
     } else {
-      return <GeoJSONLoader active={true} />;
+      return <GeoJSONLoader />;
     }
   }
 
@@ -38,16 +38,19 @@ class App extends React.Component {
 }
 
 App.propTypes = {
+  boundsLoaded: PropTypes.bool,
   heatmapLoaded: PropTypes.bool,
   interestsLoaded: PropTypes.bool
 };
 
 const mapStateToProps = (state) => ({
-  heatmapLoaded: state.heatmapLoaded,
-  interestsLoaded: state.interestsLoaded
+  boundsLoaded: state.geojson.boundsLoaded,
+  heatmapLoaded: state.geojson.heatmapLoaded,
+  interestsLoaded: state.geojson.interestsLoaded
 });
 
 const mapDispatchToProps = (dispatch) => ({
+  getBounds: () => dispatch(getBounds()),
   getHeatmap: () => dispatch(getHeatmap()),
   getInterests: () => dispatch(getInterests())
 });

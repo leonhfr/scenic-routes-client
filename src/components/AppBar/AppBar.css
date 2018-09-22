@@ -1,11 +1,16 @@
 .header {
   background-color: var(--background-dark);
-  padding: 20px;
+  opacity: 0.8;
+  padding-left: 20px;
+  width: 100vw;
+  position: fixed;
+  height: 80px;
+  display: flex;
+  align-items: center;
 }
 
 .header__title {
   color: var(--primary);
   font-weight: 500;
   font-size: 30px;
-  line-height: 30px;
 }

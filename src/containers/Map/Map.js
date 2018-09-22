@@ -5,8 +5,15 @@ import mapboxgl from 'mapbox-gl';
 
 import { geo } from '../../constants/constants.js';
 
+import Position from '../../components/Position/Position';
+
 const lat = geo.GEO_BBOX_BOTTOM + Math.abs(geo.GEO_BBOX_BOTTOM - geo.GEO_BBOX_TOP) / 2;
 const lng = geo.GEO_BBOX_LEFT + Math.abs(geo.GEO_BBOX_LEFT - geo.GEO_BBOX_RIGHT) / 2;
+
+const maxBounds = [
+  [geo.GEO_BBOX_LEFT, geo.GEO_BBOX_BOTTOM],
+  [geo.GEO_BBOX_RIGHT, geo.GEO_BBOX_TOP]
+];
 
 mapboxgl.accessToken = 'pk.eyJ1IjoibGVvbmhmciIsImEiOiJjam1icjllY3cxbG03M3BudGQzaWs1Zjk5In0.5u5qyMk6oy4MkkZKW3pbGQ';
 
@@ -28,7 +35,8 @@ class Map extends React.Component {
       container: this.mapContainer,
       style: 'mapbox://styles/mapbox/dark-v9',
       center: [lng, lat],
-      zoom
+      zoom,
+      // maxBounds
     });
 
     // disable map rotation using right click + drag
@@ -36,20 +44,20 @@ class Map extends React.Component {
     // disable map rotation using touch rotation gesture
     map.touchZoomRotate.disableRotation();
 
-    map.on('move', () => {
-      const { lng, lat } = map.getCenter();
+    map.on('mousemove', (e) => {
+      const { lng, lat } = e.lngLat;
 
       this.setState({
-        lng: lng.toFixed(4),
-        lat: lat.toFixed(4),
-        zoom: map.getZoom().toFixed(2)
+        lng: Number(lng),
+        lat: Number(lat),
+        zoom: map.getZoom()
       });
     });
 
     map.on('load', () => {
       map.addSource('interests', {
         type: 'geojson',
-        data: 'http://localhost:3000/data/data-long.json'
+        data: this.props.heatmap
       });
 
       map.addLayer({
@@ -114,11 +122,9 @@ class Map extends React.Component {
     const { lng, lat, zoom } = this.state;
 
     return (
-      <div>
-        <div className="inline-block absolute top left mt12 ml12 bg-darken75 color-white z1 py6 px12 round-full txt-s txt-bold">
-          <div>{`Longitude: ${lng} Latitude: ${lat} Zoom: ${zoom}`}</div>
-        </div>
-        <div ref={el => this.mapContainer = el} className="absolute top right left bottom" />
+      <div className="map-container">
+        <Position lng={lng} lat={lat} zoom={zoom} />
+        <div ref={el => this.mapContainer = el} style={{marginTop: '80px'}} className="fixed top right left bottom" />
       </div>
     );
   }
@@ -130,8 +136,8 @@ Map.propTypes = {
 };
 
 const mapStateToProps = (state) => ({
-  heatmap: state.heatmap,
-  interests: state.interests
+  heatmap: state.geojson.heatmap,
+  interests: state.geojson.interests
 });
 
 // const mapDispatchToProps = (dispatch) => ({

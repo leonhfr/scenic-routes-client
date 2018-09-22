@@ -6,16 +6,13 @@ import Loader from 'react-loaders';
 import 'loaders.css';
 import './GeoJSONLoader.css';
 
-function GeoJSONLoader (props) {
+function GeoJSONLoader () {
   return (
     <div className="loader-container">
-      <Loader type="pacman" active={props.active} />
+      <Loader type="pacman" active={true} />
+      <h2 className="loading-data">Loading data...</h2>
     </div>
   );
 }
-
-GeoJSONLoader.propTypes = {
-  active: PropTypes.bool.isRequired
-};
 
 export default GeoJSONLoader;
