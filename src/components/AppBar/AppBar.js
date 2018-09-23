@@ -5,9 +5,9 @@ import './AppBar.css';
 
 function AppBar (props) {
   return (
-    <header className="header">
-      <h1 className="header__title">{props.title}</h1>
-    </header>
+    <div className="header">
+      <h2 className="header__title">{props.title}</h2>
+    </div>
   );
 }
 

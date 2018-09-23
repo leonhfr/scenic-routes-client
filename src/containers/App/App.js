@@ -13,12 +13,16 @@ const title = 'Scenic Routes';
 class App extends React.Component {
 
   componentDidMount () {
+    this.props.getBounds();
     this.props.getHeatmap();
     this.props.getInterests();
   }
 
   renderContent () {
-    if (this.props.heatmapLoaded && this.props.interestsLoaded) {
+    // if (false) {
+    if (this.props.boundsLoaded &&
+        this.props.heatmapLoaded &&
+        this.props.interestsLoaded) {
       return (
         <Map className="map" />
       );
