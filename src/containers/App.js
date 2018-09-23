@@ -2,13 +2,11 @@ import React from 'react';
 import PropTypes from 'prop-types';
 
 import { connect } from 'react-redux';
-import { getBounds, getHeatmap, getInterests }  from '../../actions/geojson.actions';
+import { getBounds, getHeatmap, getInterests }  from '../actions/geojson.actions';
 
-import Map from '../Map/Map';
-import AppBar from '../../components/AppBar/AppBar';
-import GeoJSONLoader from '../../components/GeoJSONLoader/GeoJSONLoader';
-
-const title = 'Scenic Routes';
+import Map from './Map';
+import GeoJSONLoader from '../components/GeoJSONLoader';
+import LoadingBar from 'react-redux-loading-bar';
 
 class App extends React.Component {
 
@@ -18,26 +16,19 @@ class App extends React.Component {
     this.props.getInterests();
   }
 
-  renderContent () {
-    // if (false) {
+  render () {
     if (this.props.boundsLoaded &&
         this.props.heatmapLoaded &&
         this.props.interestsLoaded) {
       return (
-        <Map className="map" />
+        <div>
+          <LoadingBar showFastActions style={{ backgroundColor: 'blue', height: '5px' }} />
+          <Map />
+        </div>
       );
     } else {
       return <GeoJSONLoader />;
     }
-  }
-
-  render () {
-    return (
-      <div>
-        <AppBar title={title} />
-        {this.renderContent()}
-      </div>
-    );
   }
 }
 

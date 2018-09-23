@@ -1,6 +1,0 @@
-module.exports.geo = {
-  GEO_BBOX_TOP: 41.4060,
-  GEO_BBOX_RIGHT: 2.2105,
-  GEO_BBOX_BOTTOM: 41.3730,
-  GEO_BBOX_LEFT: 2.1675
-};

@@ -1,8 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-import './Route.css';
-
 function Route (props) {
   return (
     <header className="header">

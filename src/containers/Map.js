@@ -3,10 +3,11 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import mapboxgl from 'mapbox-gl';
 
-import { setActiveOption } from '../../actions/options.actions';
+import { setActiveOption } from '../actions/options.actions';
 
-import Position from '../../components/Position/Position';
-import Menu from '../../components/Menu/Menu';
+import Directions from '../components/Directions';
+import Position from '../components/Position';
+import Menu from '../components/Menu';
 
 mapboxgl.accessToken = 'pk.eyJ1IjoibGVvbmhmciIsImEiOiJjam1icjllY3cxbG03M3BudGQzaWs1Zjk5In0.5u5qyMk6oy4MkkZKW3pbGQ';
 
@@ -14,89 +15,131 @@ class Map extends React.Component {
 
   constructor (props) {
     super(props);
+    this.map;
     this.state = {
       zoom: 14
     };
   }
 
-  componentDidMount () {
-
-    const { zoom } = this.state;
-
-    const points = this.props.bounds.map(Number);
-    const bottomLeft = points.slice(0, 2);
-    const topRight = points.slice(2);
-    const center = [
-      bottomLeft[0] + Math.abs(bottomLeft[0] - topRight[0]) / 2,
-      bottomLeft[1] + Math.abs(bottomLeft[1] - topRight[1]) / 2
-    ];
-    const extension = 1.2;
-    const width  = Math.abs(topRight[0] - bottomLeft[0]);
-    const height = Math.abs(topRight[1] - bottomLeft[1]);
-    const offsetWidth  = width  * (extension - 1) / 2;
-    const offsetHeight = height * (extension - 1) / 2;
+  componentWillMount () {
+    const p = this.props.bounds.map(Number);
+    const o = 0.1;
+    const w = p[2] - p[0];
+    const h = p[3] - p[1];
+    const lng = p[0] + w / 2;
+    const lat = p[1] + h / 2;
     const maxBounds = [
-      [
-        bottomLeft[0] - offsetWidth,
-        bottomLeft[1] - offsetHeight
-      ],
-      [
-        topRight[0] + offsetWidth,
-        topRight[1] + offsetHeight
-      ]
+      [p[0] -o*w, p[1] -o*h],
+      [p[2] +o*w, p[3] +o*h]
     ];
-
-    const map = new mapboxgl.Map({
-      container: this.mapContainer,
-      style: 'mapbox://styles/mapbox/dark-v9',
-      center,
-      zoom,
+    this.setState({
+      lng,
+      lat,
+      center: [lng, lat],
       maxBounds
     });
+  }
 
-    // disable map rotation using right click + drag
-    map.dragRotate.disable();
-    // disable map rotation using touch rotation gesture
-    map.touchZoomRotate.disableRotation();
+  componentDidMount () {
 
-    map.on('mousemove', (e) => {
+    const minzoom = 15;
+    const maxzoom = 16;
+
+    this.map = new mapboxgl.Map({
+      container: this.mapContainer,
+      style: 'mapbox://styles/mapbox/dark-v9',
+      center: this.state.center,
+      zoom: this.state.zoom,
+      maxBounds: this.state.maxBounds
+    });
+
+    this.map.dragRotate.disable();
+    this.map.touchZoomRotate.disableRotation();
+
+    this.map.on('mousemove', (e) => {
       const { lng, lat } = e.lngLat;
-
       this.setState({
         lng: Number(lng),
-        lat: Number(lat),
-        zoom: map.getZoom()
+        lat: Number(lat)
       });
     });
 
-    map.on('load', () => {
-      map.addSource('interests', {
+    this.map.on('wheel', (e) => {
+      this.setState({
+        zoom: this.map.getZoom()
+      });
+    });
+
+    this.map.on('load', () => {
+
+      this.map.addSource('heatmap', {
         type: 'geojson',
         data: this.props.heatmap
       });
+      this.map.addSource('interests', {
+        type: 'geojson',
+        data: this.props.interests
+      });
 
-      map.addLayer({
-        id: 'interests-heat',
-        type: 'heatmap',
+      this.map.addLayer({
+        id: 'interests',
+        type: 'circle',
         source: 'interests',
-        maxzoom: 16,
+        visibility: 'visible',
+        minzoom,
+        paint: {
+          'circle-radius': 15,
+          'circle-color': 'rgb(178,24,43)',
+          'circle-blur': 0.8,
+          'circle-opacity': 0.8
+        }
+      });
+
+      const popup = new mapboxgl.Popup({
+        closeButton: false,
+        closeOnClick: false
+      });
+
+      this.map.on('mouseenter', 'interests', (e) => {
+        this.map.getCanvas().style.cursor = 'pointer';
+        const coordinates = e.features[0].geometry.coordinates.slice();
+        const pics = e.features[0].properties.pics; // TODO: change this
+        while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
+          coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
+        }
+        popup.setLngLat(coordinates)
+          .setHTML(pics)
+          .addTo(this.map);
+      });
+
+      this.map.on('mouseleave', 'interests', () => {
+        this.map.getCanvas().style.cursor = '';
+        popup.remove();
+      });
+
+      this.map.addLayer({
+        id: 'heatmap',
+        type: 'heatmap',
+        source: 'heatmap',
+        visibility: 'visible',
+        maxzoom,
         paint: {
           // Increase the heatmap weight based on frequency and property magnitude
           'heatmap-weight': [
             'interpolate',
             [ 'linear' ],
-            [ 'get', 'score' ],
+            [ 'get', 'pics' ],
             0, 0,
-            6, 1
+            10, 1
           ],
           // Increase the heatmap color weight weight by zoom level
-          // heatmap-intensity is a multiplier on top of heatmap-weight
+          // heatm    ap-intensity is a multiplier on top of heatmap-weight
           'heatmap-intensity': [
             'interpolate',
             [ 'linear' ],
             [ 'zoom' ],
             0, 1,
-            9, 3
+            maxzoom, 3
           ],
           // Color ramp for heatmap.  Domain is 0 (low) to 1 (high).
           // Begin color ramp at 0-stop with a 0-transparancy color
@@ -118,34 +161,37 @@ class Map extends React.Component {
             [ 'linear' ],
             [ 'zoom' ],
             0, 2,
-            8, 24
+            maxzoom, 20
           ],
           // Transition from heatmap to circle layer by zoom level
           'heatmap-opacity': [
             'interpolate',
             [ 'linear' ],
             [ 'zoom' ],
-            7, 1,
-            20, 0
+            minzoom, 1,
+            maxzoom, 0
           ]
         }
-      }, 'waterway-label');
+      });
     });
   }
 
+  componentDidUpdate () {
+
+  }
+
   render () {
-    // const { lng, lat, zoom } = this.state;
-    const { zoom } = this.state;
+    const { lng, lat, zoom } = this.state;
 
     return (
       <div className="map-container">
-        <Position lng={0} lat={0} zoom={zoom} />
+        <Position lng={lng} lat={lat} zoom={zoom} />
         <Menu
           options={this.props.options}
           active={this.props.active}
           onChange={this.props.setActiveOption}
         />
-        <div ref={el => this.mapContainer = el} style={{marginTop: '80px'}} className="fixed top right left bottom" />
+        <div ref={el => this.mapContainer = el} className="fixed top right left bottom" />
       </div>
     );
   }

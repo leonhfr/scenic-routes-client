@@ -3,15 +3,11 @@ import { namespace } from '../constants/namespace';
 const options = [
   {
     name: 'Heatmap',
-    property: 'heatmap'
-  },
-  {
-    name: 'Interests',
-    property: 'interests'
+    layers: ['heatmap', 'interests']
   },
   {
     name: 'Scenic Routes',
-    property: 'scenic-routes'
+    layers: ['scenic-routes']
   }
 ];
 
