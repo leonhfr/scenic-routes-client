@@ -4,19 +4,21 @@ import { connect } from 'react-redux';
 import mapboxgl from 'mapbox-gl';
 
 import { setActiveOption } from '../actions/options.actions';
-import { getRoutes, delRoutes }  from '../actions/routes.actions';
+import { getRoutes, delRoutes, addWaypoint, delWaypoints }  from '../actions/routes.actions';
 
 // import Directions from '../components/Directions';
 import Position from '../components/Position';
 import Menu from '../components/Menu';
 
-import { computeBounds } from './Map.config';
-import { wrapFeatures } from './Map.config';
-import { heatmapLayer } from './Map.config';
-import { interestsLayer } from './Map.config';
-import { routesStartEndLayer } from './Map.config';
-import { routesInputLayer } from './Map.config';
-import { routesLineLayer } from './Map.config';
+import {
+  computeBounds,
+  getEndpoint,
+  heatmapLayer,
+  interestsLayer,
+  routesStartEndLayer,
+  routesInputLayer,
+  routesLineLayer
+} from './Map.config';
 
 mapboxgl.accessToken = 'pk.eyJ1IjoibGVvbmhmciIsImEiOiJjam1icjllY3cxbG03M3BudGQzaWs1Zjk5In0.5u5qyMk6oy4MkkZKW3pbGQ';
 
@@ -26,8 +28,7 @@ class Map extends React.Component {
     super(props);
     this.map = {};
     this.state = {
-      zoom: 14,
-      points: []
+      zoom: 14
     };
   }
 
@@ -65,8 +66,14 @@ class Map extends React.Component {
         type: 'geojson',
         data: this.props.interests
       });
-      this.map.addSource('scenic-routes-request', wrapFeatures([]));
-      this.map.addSource('scenic-routes-response', wrapFeatures([]));
+      this.map.addSource('scenic-routes-request', {
+        type: 'geojson',
+        data: this.props.request
+      });
+      this.map.addSource('scenic-routes-response', {
+        type: 'geojson',
+        data: this.props.response
+      });
 
       this.map.addLayer(heatmapLayer);
       this.map.addLayer(interestsLayer);
@@ -112,50 +119,32 @@ class Map extends React.Component {
 
       this.map.on('click', (e) => {
         if (this.props.active.id !== 'scenicRoutes') return;
-        const len = this.state.points.length;
+        const len = this.props.request.features.length;
         // Draw A
         if (len === 0) {
-          this.setState({
-            points: [this.drawPoint(e.lngLat)]
-          });
+          this.props.addWaypoint(e.lngLat);
           this.map
             .getSource('scenic-routes-request')
-            .setData({
-              type: 'FeatureCollection',
-              features: this.state.points
-            });
-        }
-        // Draw B and make request
-        else if (len === 1) {
-          this.setState({
-            points: [
-              ...this.state.points,
-              this.drawPoint(e.lngLat)
-            ]
-          });
-          this.map
-            .getSource('scenic-routes-request')
-            .setData({
-              type: 'FeatureCollection',
-              features: this.state.points
-            });
-          this.props.getRoutes(this.getEndpoint(this.state.points));
-          // TODO: make req
-          // TODO: draw route
-        }
-        else {
-          this.setState({
-            points: []
-          });
-          this.map
-            .getSource('scenic-routes-request')
-            .setData({
-              type: 'FeatureCollection',
-              features: []
-            });
+            .setData(this.props.request);
           this.props.delRoutes();
-          // TODO: remove pts
-          // TODO: remove routes
+          this.map
+            .getSource('scenic-routes-response')
+            .setData(this.props.response);
+        }
+        // Draw B and make request, then empty request
+        else {
+          this.props.addWaypoint(e.lngLat);
+          this.map
+            .getSource('scenic-routes-request')
+            .setData(this.props.request);
+          this.props.getRoutes(getEndpoint(this.props.request));
+          this.map
+            .getSource('scenic-routes-response')
+            .setData(this.props.response);
+          this.props.delWaypoints();
+          this.map
+            .getSource('scenic-routes-request')
+            .setData(this.props.request);
         }
       });
 
@@ -165,29 +154,6 @@ class Map extends React.Component {
 
   componentDidUpdate () {
     this.setVisibility();
-  }
-
-  getEndpoint (data) {
-    const endpoint = [];
-    for (let point of data) {
-      for (let coord of point.geometry.coordinates) {
-        endpoint.push(coord.toFixed(5));
-      }
-    }
-    return endpoint.join('/');
-  }
-
-  drawPoint (coords) {
-    return {
-      type: 'Feature',
-      geometry: {
-        type: 'Point',
-        coordinates: [
-          coords.lng,
-          coords.lat
-        ]
-      }
-    };
   }
 
   setVisibility () {
@@ -226,11 +192,13 @@ Map.propTypes = {
   layers: PropTypes.object.isRequired,
   options: PropTypes.array.isRequired,
   active: PropTypes.object.isRequired,
-  route: PropTypes.object.isRequired,
-  routeDisplay: PropTypes.bool.isRequired,
   setActiveOption: PropTypes.func.isRequired,
+  request: PropTypes.object.isRequired,
+  response: PropTypes.object.isRequired,
   getRoutes: PropTypes.func.isRequired,
-  delRoutes: PropTypes.func.isRequired
+  delRoutes: PropTypes.func.isRequired,
+  addWaypoint: PropTypes.func.isRequired,
+  delWaypoints: PropTypes.func.isRequired
 };
 
 const mapStateToProps = (state) => ({
@@ -240,14 +208,16 @@ const mapStateToProps = (state) => ({
   layers: state.options.layers,
   options: state.options.options,
   active: state.options.active,
-  route: state.routes.route,
-  routeDisplay: state.routes.routeDisplay
+  request: state.routes.request,
+  response: state.routes.response
 });
 
 const mapDispatchToProps = (dispatch) => ({
   setActiveOption: (option) => dispatch(setActiveOption(option)),
   getRoutes: (data) => dispatch(getRoutes(data)),
-  delRoutes: () => dispatch(delRoutes())
+  delRoutes: () => dispatch(delRoutes()),
+  addWaypoint: (waypoint) => dispatch(addWaypoint(waypoint)),
+  delWaypoints: () => dispatch(delWaypoints())
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(Map);

@@ -7,6 +7,15 @@ export const getRoutes = (endpoint) => ({
   }
 });
 
-export const delRoutes = () => ({
+export const delRoutes = (endpoint) => ({
   type: namespace.ROUTES_DEL
+});
+
+export const addWaypoint = (waypoint) => ({
+  type: namespace.ROUTES_ADD_WAYPOINT,
+  data: waypoint
+});
+
+export const delWaypoints = () => ({
+  type: namespace.ROUTES_DEL_WAYPOINTS
 });

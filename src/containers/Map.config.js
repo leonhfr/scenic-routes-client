@@ -15,14 +15,15 @@ export const computeBounds = (p) => {
   };
 };
 
-export const wrapFeatures = (features) => {
-  return {
-    type: 'geojson',
-    data: {
-      type: 'FeatureCollection',
-      features
+export const getEndpoint = (data) => {
+  // TODO: refactor to receive geojson.data as arg
+  const endpoint = [];
+  for (let point of data.features) {
+    for (let coord of point.geometry.coordinates) {
+      endpoint.push(coord.toFixed(5));
     }
-  };
+  }
+  return endpoint.join('/');
 };
 
 export const minzoom = 15;
