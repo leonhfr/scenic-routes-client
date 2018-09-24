@@ -144,14 +144,16 @@ export const routesLineLayer = {
   type: 'line',
   source: 'scenic-routes-response',
   layout: {
-    visibility: 'none'
+    visibility: 'none',
+    'line-join': 'round',
+    'line-cap': 'round'
   },
-  // paint: {
-  //   'circle-radius': 50,
-  //   'circle-color': 'rgb(178,24,43)',
-  //   'circle-blur': 0.8,
-  //   'circle-opacity': 0.8
-  // }
+  paint: {
+    'line-color': '#3bb2d0',
+    'line-width': 4,
+    'line-opacity': 1,
+    'line-dasharray': [0, 1.5]
+  }
 };
 
 export const routesInterestsLayer = {

@@ -120,31 +120,16 @@ class Map extends React.Component {
       this.map.on('click', (e) => {
         if (this.props.active.id !== 'scenicRoutes') return;
         const len = this.props.request.features.length;
-        // Draw A
+        // Draw A and empty previous response object
         if (len === 0) {
           this.props.addWaypoint(e.lngLat);
-          this.map
-            .getSource('scenic-routes-request')
-            .setData(this.props.request);
           this.props.delRoutes();
-          this.map
-            .getSource('scenic-routes-response')
-            .setData(this.props.response);
         }
         // Draw B and make request, then empty request
         else {
           this.props.addWaypoint(e.lngLat);
-          this.map
-            .getSource('scenic-routes-request')
-            .setData(this.props.request);
           this.props.getRoutes(getEndpoint(this.props.request));
-          this.map
-            .getSource('scenic-routes-response')
-            .setData(this.props.response);
           this.props.delWaypoints();
-          this.map
-            .getSource('scenic-routes-request')
-            .setData(this.props.request);
         }
       });
 
@@ -154,6 +139,12 @@ class Map extends React.Component {
 
   componentDidUpdate () {
     this.setVisibility();
+    this.map
+      .getSource('scenic-routes-request')
+      .setData(this.props.request);
+    this.map
+      .getSource('scenic-routes-response')
+      .setData(this.props.response);
   }
 
   setVisibility () {

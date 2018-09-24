@@ -15,7 +15,7 @@ export default (state = defaultState, action) => {
   case namespace.ROUTES_GET_SUCCESS:
     return {
       ...state,
-      response: action.data
+      response: action.data.routes[0].geometry
     };
   case namespace.ROUTES_DEL:
     return {
