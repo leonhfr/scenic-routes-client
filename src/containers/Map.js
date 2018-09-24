@@ -4,7 +4,7 @@ import { connect } from 'react-redux';
 import mapboxgl from 'mapbox-gl';
 
 import { setActiveOption } from '../actions/options.actions';
-import { getRoutes }  from '../actions/routes.actions';
+import { getRoutes, delRoutes }  from '../actions/routes.actions';
 
 // import Directions from '../components/Directions';
 import Position from '../components/Position';
@@ -14,7 +14,9 @@ import { computeBounds } from './Map.config';
 import { wrapFeatures } from './Map.config';
 import { heatmapLayer } from './Map.config';
 import { interestsLayer } from './Map.config';
-import { routesLayer } from './Map.config';
+import { routesStartEndLayer } from './Map.config';
+import { routesInputLayer } from './Map.config';
+import { routesLineLayer } from './Map.config';
 
 mapboxgl.accessToken = 'pk.eyJ1IjoibGVvbmhmciIsImEiOiJjam1icjllY3cxbG03M3BudGQzaWs1Zjk5In0.5u5qyMk6oy4MkkZKW3pbGQ';
 
@@ -63,12 +65,14 @@ class Map extends React.Component {
         type: 'geojson',
         data: this.props.interests
       });
-      this.map.addSource('scenic-routes-points', wrapFeatures([]));
-      this.map.addSource('scenic-routes-route', wrapFeatures([]));
+      this.map.addSource('scenic-routes-request', wrapFeatures([]));
+      this.map.addSource('scenic-routes-response', wrapFeatures([]));
 
       this.map.addLayer(heatmapLayer);
       this.map.addLayer(interestsLayer);
-      this.map.addLayer(routesLayer);
+      this.map.addLayer(routesInputLayer);
+      this.map.addLayer(routesStartEndLayer);
+      this.map.addLayer(routesLineLayer);
 
       this.map.on('mousemove', (e) => {
         const { lng, lat } = e.lngLat;
@@ -115,7 +119,7 @@ class Map extends React.Component {
             points: [this.drawPoint(e.lngLat)]
           });
           this.map
-            .getSource('scenic-routes-points')
+            .getSource('scenic-routes-request')
             .setData({
               type: 'FeatureCollection',
               features: this.state.points
@@ -130,7 +134,7 @@ class Map extends React.Component {
             ]
           });
           this.map
-            .getSource('scenic-routes-points')
+            .getSource('scenic-routes-request')
             .setData({
               type: 'FeatureCollection',
               features: this.state.points
@@ -144,11 +148,12 @@ class Map extends React.Component {
             points: []
           });
           this.map
-            .getSource('scenic-routes-points')
+            .getSource('scenic-routes-request')
             .setData({
               type: 'FeatureCollection',
               features: []
             });
+          this.props.delRoutes();
           // TODO: remove pts
           // TODO: remove routes
         }
@@ -221,8 +226,11 @@ Map.propTypes = {
   layers: PropTypes.object.isRequired,
   options: PropTypes.array.isRequired,
   active: PropTypes.object.isRequired,
+  route: PropTypes.object.isRequired,
+  routeDisplay: PropTypes.bool.isRequired,
   setActiveOption: PropTypes.func.isRequired,
-  getRoutes: PropTypes.func.isRequired
+  getRoutes: PropTypes.func.isRequired,
+  delRoutes: PropTypes.func.isRequired
 };
 
 const mapStateToProps = (state) => ({
@@ -231,12 +239,15 @@ const mapStateToProps = (state) => ({
   interests: state.geojson.interests,
   layers: state.options.layers,
   options: state.options.options,
-  active: state.options.active
+  active: state.options.active,
+  route: state.routes.route,
+  routeDisplay: state.routes.routeDisplay
 });
 
 const mapDispatchToProps = (dispatch) => ({
   setActiveOption: (option) => dispatch(setActiveOption(option)),
-  getRoutes: (data) => dispatch(getRoutes(data))
+  getRoutes: (data) => dispatch(getRoutes(data)),
+  delRoutes: () => dispatch(delRoutes())
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(Map);

@@ -1,7 +1,8 @@
 import { namespace } from '../constants/namespace';
 
 const defaultState = {
-  route: {}
+  route: {},
+  routeDisplay: false
 };
 
 export default (state = defaultState, action) => {
@@ -10,7 +11,13 @@ export default (state = defaultState, action) => {
     return {
       ...state,
       route: action.data,
-      routeLoaded: true
+      routeDisplay: true
+    };
+  case namespace.ROUTES_DEL:
+    return {
+      ...state,
+      route: {},
+      routeDisplay: false
     };
   default:
     return state;

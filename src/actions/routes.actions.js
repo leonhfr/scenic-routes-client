@@ -6,3 +6,7 @@ export const getRoutes = (endpoint) => ({
     endpoint: '/routes/' + endpoint
   }
 });
+
+export const delRoutes = () => ({
+  type: namespace.ROUTES_DEL
+});

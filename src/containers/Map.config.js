@@ -30,7 +30,7 @@ export const maxzoom = 16;
 
 export const layers = {
   heatmap: ['heatmap', 'interests'],
-  scenicRoutes: ['scenic-routes-points']
+  scenicRoutes: ['scenic-routes-input', 'scenic-routes-startend', 'scenic-routes-line']
 };
 
 export const heatmapLayer = {
@@ -108,10 +108,10 @@ export const interestsLayer = {
   }
 };
 
-export const routesLayer = {
-  id: 'scenic-routes-points',
+export const routesInputLayer = {
+  id: 'scenic-routes-input',
   type: 'circle',
-  source: 'scenic-routes-points',
+  source: 'scenic-routes-request',
   layout: {
     visibility: 'none'
   },
@@ -121,4 +121,49 @@ export const routesLayer = {
     'circle-blur': 0.8,
     'circle-opacity': 0.8
   }
+};
+
+export const routesStartEndLayer = {
+  id: 'scenic-routes-startend',
+  type: 'circle',
+  source: 'scenic-routes-response',
+  layout: {
+    visibility: 'none'
+  },
+  paint: {
+    'circle-radius': 50,
+    'circle-color': 'rgb(178,24,43)',
+    'circle-blur': 0.8,
+    'circle-opacity': 0.8
+  }
+};
+
+export const routesLineLayer = {
+  id: 'scenic-routes-line',
+  type: 'line',
+  source: 'scenic-routes-response',
+  layout: {
+    visibility: 'none'
+  },
+  // paint: {
+  //   'circle-radius': 50,
+  //   'circle-color': 'rgb(178,24,43)',
+  //   'circle-blur': 0.8,
+  //   'circle-opacity': 0.8
+  // }
+};
+
+export const routesInterestsLayer = {
+  id: 'scenic-routes-interests',
+  type: 'symbol',
+  source: 'scenic-routes-response',
+  layout: {
+    visibility: 'none'
+  },
+  // paint: {
+  //   'circle-radius': 50,
+  //   'circle-color': 'rgb(178,24,43)',
+  //   'circle-blur': 0.8,
+  //   'circle-opacity': 0.8
+  // }
 };
