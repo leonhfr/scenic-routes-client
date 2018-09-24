@@ -15,12 +15,22 @@ export const computeBounds = (p) => {
   };
 };
 
+export const wrapFeatures = (features) => {
+  return {
+    type: 'geojson',
+    data: {
+      type: 'FeatureCollection',
+      features
+    }
+  };
+};
+
 export const minzoom = 15;
 export const maxzoom = 16;
 
 export const layers = {
   heatmap: ['heatmap', 'interests'],
-  scenicRoutes: ['scenic-routes']
+  scenicRoutes: ['scenic-routes-points']
 };
 
 export const heatmapLayer = {
@@ -99,13 +109,12 @@ export const interestsLayer = {
 };
 
 export const routesLayer = {
-  id: 'scenic-routes',
+  id: 'scenic-routes-points',
   type: 'circle',
-  source: 'interests',
+  source: 'scenic-routes-points',
   layout: {
     visibility: 'none'
   },
-  minzoom,
   paint: {
     'circle-radius': 50,
     'circle-color': 'rgb(178,24,43)',

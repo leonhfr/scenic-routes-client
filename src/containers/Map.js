@@ -4,12 +4,14 @@ import { connect } from 'react-redux';
 import mapboxgl from 'mapbox-gl';
 
 import { setActiveOption } from '../actions/options.actions';
+import { getRoutes }  from '../actions/routes.actions';
 
-import Directions from '../components/Directions';
+// import Directions from '../components/Directions';
 import Position from '../components/Position';
 import Menu from '../components/Menu';
 
 import { computeBounds } from './Map.config';
+import { wrapFeatures } from './Map.config';
 import { heatmapLayer } from './Map.config';
 import { interestsLayer } from './Map.config';
 import { routesLayer } from './Map.config';
@@ -20,9 +22,10 @@ class Map extends React.Component {
 
   constructor (props) {
     super(props);
-    this.map;
+    this.map = {};
     this.state = {
-      zoom: 14
+      zoom: 14,
+      points: []
     };
   }
 
@@ -50,35 +53,36 @@ class Map extends React.Component {
     this.map.dragRotate.disable();
     this.map.touchZoomRotate.disableRotation();
 
-    this.map.on('mousemove', (e) => {
-      const { lng, lat } = e.lngLat;
-      this.setState({
-        lng: Number(lng),
-        lat: Number(lat)
-      });
-    });
-
-    this.map.on('wheel', (e) => {
-      this.setState({
-        zoom: this.map.getZoom()
-      });
-    });
-
     this.map.on('load', () => {
 
       this.map.addSource('heatmap', {
         type: 'geojson',
         data: this.props.heatmap
       });
-
       this.map.addSource('interests', {
         type: 'geojson',
         data: this.props.interests
       });
+      this.map.addSource('scenic-routes-points', wrapFeatures([]));
+      this.map.addSource('scenic-routes-route', wrapFeatures([]));
 
       this.map.addLayer(heatmapLayer);
       this.map.addLayer(interestsLayer);
       this.map.addLayer(routesLayer);
+
+      this.map.on('mousemove', (e) => {
+        const { lng, lat } = e.lngLat;
+        this.setState({
+          lng: Number(lng),
+          lat: Number(lat)
+        });
+      });
+
+      this.map.on('wheel', (e) => {
+        this.setState({
+          zoom: this.map.getZoom()
+        });
+      });
 
       const popup = new mapboxgl.Popup({
         closeButton: false,
@@ -102,12 +106,83 @@ class Map extends React.Component {
         popup.remove();
       });
 
+      this.map.on('click', (e) => {
+        if (this.props.active.id !== 'scenicRoutes') return;
+        const len = this.state.points.length;
+        // Draw A
+        if (len === 0) {
+          this.setState({
+            points: [this.drawPoint(e.lngLat)]
+          });
+          this.map
+            .getSource('scenic-routes-points')
+            .setData({
+              type: 'FeatureCollection',
+              features: this.state.points
+            });
+        }
+        // Draw B and make request
+        else if (len === 1) {
+          this.setState({
+            points: [
+              ...this.state.points,
+              this.drawPoint(e.lngLat)
+            ]
+          });
+          this.map
+            .getSource('scenic-routes-points')
+            .setData({
+              type: 'FeatureCollection',
+              features: this.state.points
+            });
+          this.props.getRoutes(this.getEndpoint(this.state.points));
+          // TODO: make req
+          // TODO: draw route
+        }
+        else {
+          this.setState({
+            points: []
+          });
+          this.map
+            .getSource('scenic-routes-points')
+            .setData({
+              type: 'FeatureCollection',
+              features: []
+            });
+          // TODO: remove pts
+          // TODO: remove routes
+        }
+      });
+
       this.setVisibility();
     });
   }
 
   componentDidUpdate () {
     this.setVisibility();
+  }
+
+  getEndpoint (data) {
+    const endpoint = [];
+    for (let point of data) {
+      for (let coord of point.geometry.coordinates) {
+        endpoint.push(coord.toFixed(5));
+      }
+    }
+    return endpoint.join('/');
+  }
+
+  drawPoint (coords) {
+    return {
+      type: 'Feature',
+      geometry: {
+        type: 'Point',
+        coordinates: [
+          coords.lng,
+          coords.lat
+        ]
+      }
+    };
   }
 
   setVisibility () {
@@ -146,7 +221,8 @@ Map.propTypes = {
   layers: PropTypes.object.isRequired,
   options: PropTypes.array.isRequired,
   active: PropTypes.object.isRequired,
-  setActiveOption: PropTypes.func.isRequired
+  setActiveOption: PropTypes.func.isRequired,
+  getRoutes: PropTypes.func.isRequired
 };
 
 const mapStateToProps = (state) => ({
@@ -159,7 +235,8 @@ const mapStateToProps = (state) => ({
 });
 
 const mapDispatchToProps = (dispatch) => ({
-  setActiveOption: (option) => dispatch(setActiveOption(option))
+  setActiveOption: (option) => dispatch(setActiveOption(option)),
+  getRoutes: (data) => dispatch(getRoutes(data))
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(Map);
