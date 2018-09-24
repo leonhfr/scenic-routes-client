@@ -1,18 +1,21 @@
 import { namespace } from '../constants/namespace';
 
+import { layers } from '../containers/Map.config';
+
 const options = [
   {
     name: 'Heatmap',
-    layers: ['heatmap', 'interests']
+    id: 'heatmap'
   },
   {
     name: 'Scenic Routes',
-    layers: ['scenic-routes']
+    id: 'scenicRoutes'
   }
 ];
 
 const defaultState = {
   options,
+  layers,
   active: options[0]
 };
 

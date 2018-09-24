@@ -8,7 +8,7 @@ function Menu (props) {
   const renderOptions = (option, i) => {
     return (
       <label key={i} className="toggle-container">
-        <input onChange={() => props.onChange(option)} checked={option.name === active.name} name="toggle" type="radio" />
+        <input onChange={() => props.onChange(option)} checked={option.id === active.id} name="toggle" type="radio" />
         <div className="toggle txt-s py3 toggle--active-white">{option.name}</div>
       </label>
     );

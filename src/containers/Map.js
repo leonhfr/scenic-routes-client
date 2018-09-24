@@ -9,6 +9,11 @@ import Directions from '../components/Directions';
 import Position from '../components/Position';
 import Menu from '../components/Menu';
 
+import { computeBounds } from './Map.config';
+import { heatmapLayer } from './Map.config';
+import { interestsLayer } from './Map.config';
+import { routesLayer } from './Map.config';
+
 mapboxgl.accessToken = 'pk.eyJ1IjoibGVvbmhmciIsImEiOiJjam1icjllY3cxbG03M3BudGQzaWs1Zjk5In0.5u5qyMk6oy4MkkZKW3pbGQ';
 
 class Map extends React.Component {
@@ -22,16 +27,8 @@ class Map extends React.Component {
   }
 
   componentWillMount () {
-    const p = this.props.bounds.map(Number);
-    const o = 0.1;
-    const w = p[2] - p[0];
-    const h = p[3] - p[1];
-    const lng = p[0] + w / 2;
-    const lat = p[1] + h / 2;
-    const maxBounds = [
-      [p[0] -o*w, p[1] -o*h],
-      [p[2] +o*w, p[3] +o*h]
-    ];
+    const p = computeBounds(this.props.bounds.map(Number));
+    const { lng, lat, maxBounds } = p;
     this.setState({
       lng,
       lat,
@@ -41,9 +38,6 @@ class Map extends React.Component {
   }
 
   componentDidMount () {
-
-    const minzoom = 15;
-    const maxzoom = 16;
 
     this.map = new mapboxgl.Map({
       container: this.mapContainer,
@@ -76,24 +70,15 @@ class Map extends React.Component {
         type: 'geojson',
         data: this.props.heatmap
       });
+
       this.map.addSource('interests', {
         type: 'geojson',
         data: this.props.interests
       });
 
-      this.map.addLayer({
-        id: 'interests',
-        type: 'circle',
-        source: 'interests',
-        visibility: 'visible',
-        minzoom,
-        paint: {
-          'circle-radius': 15,
-          'circle-color': 'rgb(178,24,43)',
-          'circle-blur': 0.8,
-          'circle-opacity': 0.8
-        }
-      });
+      this.map.addLayer(heatmapLayer);
+      this.map.addLayer(interestsLayer);
+      this.map.addLayer(routesLayer);
 
       const popup = new mapboxgl.Popup({
         closeButton: false,
@@ -117,67 +102,24 @@ class Map extends React.Component {
         popup.remove();
       });
 
-      this.map.addLayer({
-        id: 'heatmap',
-        type: 'heatmap',
-        source: 'heatmap',
-        visibility: 'visible',
-        maxzoom,
-        paint: {
-          // Increase the heatmap weight based on frequency and property magnitude
-          'heatmap-weight': [
-            'interpolate',
-            [ 'linear' ],
-            [ 'get', 'pics' ],
-            0, 0,
-            10, 1
-          ],
-          // Increase the heatmap color weight weight by zoom level
-          // heatm    ap-intensity is a multiplier on top of heatmap-weight
-          'heatmap-intensity': [
-            'interpolate',
-            [ 'linear' ],
-            [ 'zoom' ],
-            0, 1,
-            maxzoom, 3
-          ],
-          // Color ramp for heatmap.  Domain is 0 (low) to 1 (high).
-          // Begin color ramp at 0-stop with a 0-transparancy color
-          // to create a blur-like effect.
-          'heatmap-color': [
-            'interpolate',
-            [ 'linear' ],
-            [ 'heatmap-density' ],
-            0, 'rgba(33,102,172,0)',
-            0.2, 'rgb(103,169,207)',
-            0.4, 'rgb(209,229,240)',
-            0.6, 'rgb(253,219,199)',
-            0.8, 'rgb(239,138,98)',
-            1, 'rgb(178,24,43)'
-          ],
-          // Adjust the heatmap radius by zoom level
-          'heatmap-radius': [
-            'interpolate',
-            [ 'linear' ],
-            [ 'zoom' ],
-            0, 2,
-            maxzoom, 20
-          ],
-          // Transition from heatmap to circle layer by zoom level
-          'heatmap-opacity': [
-            'interpolate',
-            [ 'linear' ],
-            [ 'zoom' ],
-            minzoom, 1,
-            maxzoom, 0
-          ]
-        }
-      });
+      this.setVisibility();
     });
   }
 
   componentDidUpdate () {
+    this.setVisibility();
+  }
 
+  setVisibility () {
+    for (let option of this.props.options) {
+      for (let layer of this.props.layers[option.id]) {
+        if (option.id === this.props.active.id) {
+          this.map.setLayoutProperty(layer, 'visibility', 'visible');
+        } else {
+          this.map.setLayoutProperty(layer, 'visibility', 'none');
+        }
+      }
+    }
   }
 
   render () {
@@ -201,6 +143,7 @@ Map.propTypes = {
   bounds: PropTypes.array.isRequired,
   heatmap: PropTypes.object.isRequired,
   interests: PropTypes.object.isRequired,
+  layers: PropTypes.object.isRequired,
   options: PropTypes.array.isRequired,
   active: PropTypes.object.isRequired,
   setActiveOption: PropTypes.func.isRequired
@@ -210,6 +153,7 @@ const mapStateToProps = (state) => ({
   bounds: state.geojson.bounds,
   heatmap: state.geojson.heatmap,
   interests: state.geojson.interests,
+  layers: state.options.layers,
   options: state.options.options,
   active: state.options.active
 });
