@@ -12,12 +12,20 @@ import apiClient from './middlewares/api';
 import './index.css';
 import App from './containers/App';
 
+const middlewares = [
+  apiClient,
+  loadingBarMiddleware({
+    promiseTypeSuffixes: ['REQUEST', 'SUCCESS', 'FAILURE']
+  })
+];
+
+if (process.env.NODE_ENV === 'development') {
+  middlewares.push(logger);
+}
+
 const store = createStore(
   reducers,
-  applyMiddleware(apiClient, logger),
-  applyMiddleware(loadingBarMiddleware({
-    promiseTypeSuffixes: ['REQUEST', 'SUCCESS', 'FAILURE']
-  }))
+  applyMiddleware(...middlewares)
 );
 
 ReactDOM.render(

@@ -123,7 +123,35 @@ class Map extends React.Component {
           .addTo(this.map);
       });
 
+      this.map.on('mouseenter', 'scenic-routes-interests', (e) => {
+        this.map.getCanvas().style.cursor = 'pointer';
+        const coordinates = e.features[0].geometry.coordinates.slice();
+        let url = '';
+        if (e.features[0].properties.urlm) {
+          url = e.features[0].properties.urlm;
+        } else {
+          url = e.features[0].properties.urlc;
+        }
+        const max = 200;
+        const content = [];
+        const imgStyle = `display:block;max-width:${max}px;max-height:${max}px;width:auto;height:auto;`;
+        content.push(`<img src="${url}" style="${imgStyle}" alt="Could not fetch image" />`);
+        if (e.features[0].properties.name) content.push(`<b>${e.features[0].properties.name}</b><br />`);
+        content.push(`${e.features[0].properties.pics} picture(s) here`);
+        while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
+          coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
+        }
+        popup.setLngLat(coordinates)
+          .setHTML(content.join(''))
+          .addTo(this.map);
+      });
+
       this.map.on('mouseleave', 'interests', () => {
+        this.map.getCanvas().style.cursor = '';
+        popup.remove();
+      });
+
+      this.map.on('mouseleave', 'scenic-routes-interests', () => {
         this.map.getCanvas().style.cursor = '';
         popup.remove();
       });
@@ -157,26 +185,8 @@ class Map extends React.Component {
       .getSource('scenic-routes-response')
       .setData(this.props.response.geometry);
     if (!this.props.request.features.length &&
-        this.props.response.geometry.features.length) {
-      // Set images interests to waypoints interests
-      // this.props.response.geometry.features
-      //   .filter(feature => feature.properties.forLayer === 'interests')
-      //   .forEach(interest => {
-      //     const node = document.createElement('<div>');
-      //     node.className = 'marker';
-      //     let url = '';
-      //     if (interest.properties.urlm) {
-      //       url = interest.properties.urlm;
-      //     } else {
-      //       url = interest.properties.urlc;
-      //     }
-      //     node.style.backgroundImage = `url(${url})`;
-      //     // HOVER
-      //     new mapboxgl.Marker(node)
-      //       .setLngLat(interest.geometry.coordinates)
-      //       .addTo(this.map);
-      //   });
-      // Zoom to path
+        this.props.response.geometry.features.length &&
+        this.props.active.id !=='heatmap') {
       const routeCoords = this.props.response.geometry.features[0].geometry.coordinates;
       const bounds = routeCoords.reduce((bounds, coords) => {
         return bounds.extend(coords);
@@ -185,8 +195,6 @@ class Map extends React.Component {
         padding: 60
       });
     }
-    // TODO: set images icons to waypoints
-    // TODO: display route stats
 
   }
 
@@ -205,6 +213,7 @@ class Map extends React.Component {
   render () {
     const { lng, lat, zoom } = this.state;
 
+    // TODO: display route stats
     return (
       <div className="map-container">
         <Position lng={lng} lat={lat} zoom={zoom} active={this.props.active} />

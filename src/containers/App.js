@@ -22,7 +22,7 @@ class App extends React.Component {
         this.props.interestsLoaded) {
       return (
         <div>
-          <LoadingBar showFastActions style={{ backgroundColor: 'blue', height: '5px' }} />
+          <LoadingBar style={{ zIndex: 100, backgroundColor: '#3bb2d0', height: '6px' }} />
           <Map />
         </div>
       );
