@@ -7,7 +7,12 @@ const emptyGeoJson = {
 
 const defaultState = {
   request: {...emptyGeoJson},
-  response: {...emptyGeoJson}
+  response: {
+    geometry: {
+      ...emptyGeoJson
+    },
+    data: {}
+  }
 };
 
 export default (state = defaultState, action) => {
@@ -15,12 +20,17 @@ export default (state = defaultState, action) => {
   case namespace.ROUTES_GET_SUCCESS:
     return {
       ...state,
-      response: action.data.routes[0].geometry
+      response: action.data
     };
   case namespace.ROUTES_DEL:
     return {
       ...state,
-      response: {...emptyGeoJson}
+      response: {
+        geometry: {
+          ...emptyGeoJson
+        },
+        data: {}
+      }
     };
   case namespace.ROUTES_ADD_WAYPOINT:
     return {

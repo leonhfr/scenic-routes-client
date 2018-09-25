@@ -6,7 +6,7 @@ import mapboxgl from 'mapbox-gl';
 import { setActiveOption } from '../actions/options.actions';
 import { getRoutes, delRoutes, addWaypoint, delWaypoints }  from '../actions/routes.actions';
 
-// import Directions from '../components/Directions';
+import Route from '../components/Route';
 import Position from '../components/Position';
 import Menu from '../components/Menu';
 
@@ -17,7 +17,8 @@ import {
   interestsLayer,
   routesStartEndLayer,
   routesInputLayer,
-  routesLineLayer
+  routesLineLayer,
+  routesInterestsLayer
 } from './Map.config';
 
 mapboxgl.accessToken = 'pk.eyJ1IjoibGVvbmhmciIsImEiOiJjam1icjllY3cxbG03M3BudGQzaWs1Zjk5In0.5u5qyMk6oy4MkkZKW3pbGQ';
@@ -72,7 +73,7 @@ class Map extends React.Component {
       });
       this.map.addSource('scenic-routes-response', {
         type: 'geojson',
-        data: this.props.response
+        data: this.props.response.geometry
       });
 
       this.map.addLayer(heatmapLayer);
@@ -80,8 +81,10 @@ class Map extends React.Component {
       this.map.addLayer(routesInputLayer);
       this.map.addLayer(routesStartEndLayer);
       this.map.addLayer(routesLineLayer);
+      this.map.addLayer(routesInterestsLayer);
 
       this.map.on('mousemove', (e) => {
+        if (this.props.active.id === 'scenicRoutes') return;
         const { lng, lat } = e.lngLat;
         this.setState({
           lng: Number(lng),
@@ -90,6 +93,7 @@ class Map extends React.Component {
       });
 
       this.map.on('wheel', (e) => {
+        if (this.props.active.id === 'scenicRoutes') return;
         this.setState({
           zoom: this.map.getZoom()
         });
@@ -103,12 +107,19 @@ class Map extends React.Component {
       this.map.on('mouseenter', 'interests', (e) => {
         this.map.getCanvas().style.cursor = 'pointer';
         const coordinates = e.features[0].geometry.coordinates.slice();
-        const pics = e.features[0].properties.pics; // TODO: change this
+        let url = '';
+        if (e.features[0].properties.urlm) {
+          url = e.features[0].properties.urlm;
+        } else {
+          url = e.features[0].properties.urlc;
+        }
+        const max = 200;
+        const content = `<img src="${url}" style="display:block;max-width:${max}px;max-height:${max}px;width:auto;height:auto;" alt="Could not fetch image" />${e.features[0].properties.pics} picture(s) here`;
         while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
           coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
         }
         popup.setLngLat(coordinates)
-          .setHTML(pics)
+          .setHTML(content)
           .addTo(this.map);
       });
 
@@ -144,7 +155,39 @@ class Map extends React.Component {
       .setData(this.props.request);
     this.map
       .getSource('scenic-routes-response')
-      .setData(this.props.response);
+      .setData(this.props.response.geometry);
+    if (!this.props.request.features.length &&
+        this.props.response.geometry.features.length) {
+      // Set images interests to waypoints interests
+      // this.props.response.geometry.features
+      //   .filter(feature => feature.properties.forLayer === 'interests')
+      //   .forEach(interest => {
+      //     const node = document.createElement('<div>');
+      //     node.className = 'marker';
+      //     let url = '';
+      //     if (interest.properties.urlm) {
+      //       url = interest.properties.urlm;
+      //     } else {
+      //       url = interest.properties.urlc;
+      //     }
+      //     node.style.backgroundImage = `url(${url})`;
+      //     // HOVER
+      //     new mapboxgl.Marker(node)
+      //       .setLngLat(interest.geometry.coordinates)
+      //       .addTo(this.map);
+      //   });
+      // Zoom to path
+      const routeCoords = this.props.response.geometry.features[0].geometry.coordinates;
+      const bounds = routeCoords.reduce((bounds, coords) => {
+        return bounds.extend(coords);
+      }, new mapboxgl.LngLatBounds(routeCoords[0], routeCoords[0]));
+      this.map.fitBounds(bounds, {
+        padding: 60
+      });
+    }
+    // TODO: set images icons to waypoints
+    // TODO: display route stats
+
   }
 
   setVisibility () {
@@ -164,7 +207,7 @@ class Map extends React.Component {
 
     return (
       <div className="map-container">
-        <Position lng={lng} lat={lat} zoom={zoom} />
+        <Position lng={lng} lat={lat} zoom={zoom} active={this.props.active} />
         <Menu
           options={this.props.options}
           active={this.props.active}

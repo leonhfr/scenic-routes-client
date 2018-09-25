@@ -31,7 +31,7 @@ export const maxzoom = 16;
 
 export const layers = {
   heatmap: ['heatmap', 'interests'],
-  scenicRoutes: ['scenic-routes-input', 'scenic-routes-startend', 'scenic-routes-line']
+  scenicRoutes: ['scenic-routes-input', 'scenic-routes-startend', 'scenic-routes-interests', 'scenic-routes-line']
 };
 
 export const heatmapLayer = {
@@ -49,16 +49,16 @@ export const heatmapLayer = {
       [ 'linear' ],
       [ 'get', 'pics' ],
       0, 0,
-      10, 1
+      20, 1
     ],
     // Increase the heatmap color weight weight by zoom level
-    // heatm    ap-intensity is a multiplier on top of heatmap-weight
+    // heatmap-intensity is a multiplier on top of heatmap-weight
     'heatmap-intensity': [
       'interpolate',
       [ 'linear' ],
       [ 'zoom' ],
       0, 1,
-      maxzoom, 3
+      20, 3
     ],
     // Color ramp for heatmap.  Domain is 0 (low) to 1 (high).
     // Begin color ramp at 0-stop with a 0-transparancy color
@@ -80,7 +80,7 @@ export const heatmapLayer = {
       [ 'linear' ],
       [ 'zoom' ],
       0, 2,
-      maxzoom, 20
+      maxzoom, 16
     ],
     // Transition from heatmap to circle layer by zoom level
     'heatmap-opacity': [
@@ -102,7 +102,25 @@ export const interestsLayer = {
   },
   minzoom,
   paint: {
-    'circle-radius': 15,
+    'circle-radius': [
+      'interpolate',
+      [ 'linear' ],
+      [ 'zoom' ],
+      minzoom, [
+        'interpolate',
+        [ 'linear' ],
+        [ 'get', 'pics' ],
+        1, 1,
+        8, 4
+      ],
+      maxzoom, [
+        'interpolate',
+        [ 'linear' ],
+        [ 'get', 'pics' ],
+        1, 8,
+        160, 40
+      ]
+    ],
     'circle-color': 'rgb(178,24,43)',
     'circle-blur': 0.8,
     'circle-opacity': 0.8
@@ -117,24 +135,9 @@ export const routesInputLayer = {
     visibility: 'none'
   },
   paint: {
-    'circle-radius': 50,
+    'circle-radius': 15,
     'circle-color': 'rgb(178,24,43)',
-    'circle-blur': 0.8,
-    'circle-opacity': 0.8
-  }
-};
-
-export const routesStartEndLayer = {
-  id: 'scenic-routes-startend',
-  type: 'circle',
-  source: 'scenic-routes-response',
-  layout: {
-    visibility: 'none'
-  },
-  paint: {
-    'circle-radius': 50,
-    'circle-color': 'rgb(178,24,43)',
-    'circle-blur': 0.8,
+    'circle-blur': 0.6,
     'circle-opacity': 0.8
   }
 };
@@ -148,6 +151,7 @@ export const routesLineLayer = {
     'line-join': 'round',
     'line-cap': 'round'
   },
+  filter: ['==', 'line', [ 'get', 'forLayer' ]],
   paint: {
     'line-color': '#3bb2d0',
     'line-width': 4,
@@ -156,17 +160,32 @@ export const routesLineLayer = {
   }
 };
 
-export const routesInterestsLayer = {
-  id: 'scenic-routes-interests',
-  type: 'symbol',
+export const routesStartEndLayer = {
+  id: 'scenic-routes-startend',
+  type: 'circle',
   source: 'scenic-routes-response',
   layout: {
     visibility: 'none'
   },
-  // paint: {
-  //   'circle-radius': 50,
-  //   'circle-color': 'rgb(178,24,43)',
-  //   'circle-blur': 0.8,
-  //   'circle-opacity': 0.8
-  // }
+  filter: ['==', 'startend', [ 'get', 'forLayer' ]],
+  paint: {
+    'circle-radius': 12,
+    'circle-color': '#3bb2d0'
+  }
+};
+
+export const routesInterestsLayer = {
+  id: 'scenic-routes-interests',
+  type: 'circle',
+  source: 'scenic-routes-response',
+  layout: {
+    visibility: 'none'
+  },
+  filter: ['==', 'interests', [ 'get', 'forLayer' ]],
+  paint: {
+    'circle-radius': 12,
+    'circle-opacity': 0,
+    'circle-stroke-color': '#3bb2d0',
+    'circle-stroke-width': 2,
+  }
 };
