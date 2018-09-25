@@ -27,7 +27,9 @@ class App extends React.Component {
         </div>
       );
     } else {
-      return <GeoJSONLoader />;
+      return (
+        <GeoJSONLoader />
+      );
     }
   }
 }

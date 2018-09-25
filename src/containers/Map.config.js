@@ -17,6 +17,7 @@ export const computeBounds = (p) => {
 
 export const getEndpoint = (data) => {
   // TODO: refactor to receive geojson.data as arg
+  // TODO: refactor to route without slashes
   const endpoint = [];
   for (let point of data.features) {
     for (let coord of point.geometry.coordinates) {
@@ -31,7 +32,13 @@ export const maxzoom = 16;
 
 export const layers = {
   heatmap: ['heatmap', 'interests'],
-  scenicRoutes: ['scenic-routes-input', 'scenic-routes-startend', 'scenic-routes-interests', 'scenic-routes-line']
+  scenicRoutes: [
+    'scenic-routes-input',
+    'scenic-routes-startend',
+    'scenic-routes-interests',
+    'scenic-routes-others',
+    'scenic-routes-line'
+  ]
 };
 
 export const heatmapLayer = {
@@ -135,10 +142,11 @@ export const routesInputLayer = {
     visibility: 'none'
   },
   paint: {
-    'circle-radius': 15,
-    'circle-color': 'rgb(178,24,43)',
-    'circle-blur': 0.6,
-    'circle-opacity': 0.8
+    'circle-radius': 12,
+    'circle-opacity': .5,
+    'circle-color': '#3bb2d0',
+    'circle-stroke-color': '#3bb2d0',
+    'circle-stroke-width': 2
   }
 };
 
@@ -187,5 +195,21 @@ export const routesInterestsLayer = {
     'circle-opacity': 0,
     'circle-stroke-color': '#3bb2d0',
     'circle-stroke-width': 2,
+  }
+};
+
+export const routesOthersLayer = {
+  id: 'scenic-routes-others',
+  type: 'circle',
+  source: 'scenic-routes-response',
+  layout: {
+    visibility: 'none'
+  },
+  filter: ['==', 'others', [ 'get', 'forLayer' ]],
+  paint: {
+    'circle-radius': 6,
+    'circle-opacity': 0,
+    'circle-stroke-color': '#3bb2d0',
+    'circle-stroke-width': 1,
   }
 };

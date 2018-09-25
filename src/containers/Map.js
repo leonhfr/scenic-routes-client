@@ -6,7 +6,7 @@ import mapboxgl from 'mapbox-gl';
 import { setActiveOption } from '../actions/options.actions';
 import { getRoutes, delRoutes, addWaypoint, delWaypoints }  from '../actions/routes.actions';
 
-import Route from '../components/Route';
+// import Route from '../components/Route';
 import Position from '../components/Position';
 import Menu from '../components/Menu';
 
@@ -18,7 +18,8 @@ import {
   routesStartEndLayer,
   routesInputLayer,
   routesLineLayer,
-  routesInterestsLayer
+  routesInterestsLayer,
+  routesOthersLayer
 } from './Map.config';
 
 mapboxgl.accessToken = 'pk.eyJ1IjoibGVvbmhmciIsImEiOiJjam1icjllY3cxbG03M3BudGQzaWs1Zjk5In0.5u5qyMk6oy4MkkZKW3pbGQ';
@@ -82,6 +83,7 @@ class Map extends React.Component {
       this.map.addLayer(routesStartEndLayer);
       this.map.addLayer(routesLineLayer);
       this.map.addLayer(routesInterestsLayer);
+      this.map.addLayer(routesOthersLayer);
 
       this.map.on('mousemove', (e) => {
         if (this.props.active.id === 'scenicRoutes') return;
@@ -146,6 +148,29 @@ class Map extends React.Component {
           .addTo(this.map);
       });
 
+      this.map.on('mouseenter', 'scenic-routes-others', (e) => {
+        this.map.getCanvas().style.cursor = 'pointer';
+        const coordinates = e.features[0].geometry.coordinates.slice();
+        let url = '';
+        if (e.features[0].properties.urlm) {
+          url = e.features[0].properties.urlm;
+        } else {
+          url = e.features[0].properties.urlc;
+        }
+        const max = 200;
+        const content = [];
+        const imgStyle = `display:block;max-width:${max}px;max-height:${max}px;width:auto;height:auto;`;
+        content.push(`<img src="${url}" style="${imgStyle}" alt="Could not fetch image" />`);
+        if (e.features[0].properties.name) content.push(`<b>${e.features[0].properties.name}</b><br />`);
+        content.push(`${e.features[0].properties.pics} picture(s) here`);
+        while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
+          coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
+        }
+        popup.setLngLat(coordinates)
+          .setHTML(content.join(''))
+          .addTo(this.map);
+      });
+
       this.map.on('mouseleave', 'interests', () => {
         this.map.getCanvas().style.cursor = '';
         popup.remove();
@@ -156,13 +181,21 @@ class Map extends React.Component {
         popup.remove();
       });
 
+      this.map.on('mouseleave', 'scenic-routes-others', () => {
+        this.map.getCanvas().style.cursor = '';
+        popup.remove();
+      });
+
       this.map.on('click', (e) => {
         if (this.props.active.id !== 'scenicRoutes') return;
-        const len = this.props.request.features.length;
+        const lenReq = this.props.request.features.length;
+        const lenRes = this.props.response.geometry.features.length;
         // Draw A and empty previous response object
-        if (len === 0) {
-          this.props.addWaypoint(e.lngLat);
+        if (lenRes > 0) {
           this.props.delRoutes();
+        }
+        else if (lenReq === 0) {
+          this.props.addWaypoint(e.lngLat);
         }
         // Draw B and make request, then empty request
         else {
