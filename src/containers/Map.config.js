@@ -142,7 +142,10 @@ export const routesInputLayer = {
     visibility: 'none'
   },
   paint: {
-    'circle-radius': 12,
+    'circle-radius': {
+      'base': 1.75,
+      'stops': [[12, 10], [22, 60]]
+    },
     'circle-opacity': .5,
     'circle-color': '#3bb2d0',
     'circle-stroke-color': '#3bb2d0',
@@ -177,7 +180,10 @@ export const routesStartEndLayer = {
   },
   filter: ['==', 'startend', [ 'get', 'forLayer' ]],
   paint: {
-    'circle-radius': 12,
+    'circle-radius': {
+      'base': 1.75,
+      'stops': [[12, 10], [22, 60]]
+    },
     'circle-color': '#3bb2d0'
   }
 };
@@ -191,7 +197,10 @@ export const routesInterestsLayer = {
   },
   filter: ['==', 'interests', [ 'get', 'forLayer' ]],
   paint: {
-    'circle-radius': 12,
+    'circle-radius': {
+      'base': 1.75,
+      'stops': [[12, 10], [22, 60]]
+    },
     'circle-opacity': 0,
     'circle-stroke-color': '#3bb2d0',
     'circle-stroke-width': 2,
@@ -207,7 +216,10 @@ export const routesOthersLayer = {
   },
   filter: ['==', 'others', [ 'get', 'forLayer' ]],
   paint: {
-    'circle-radius': 6,
+    'circle-radius': {
+      'base': 1.75,
+      'stops': [[12, 5], [22, 30]]
+    },
     'circle-opacity': 0,
     'circle-stroke-color': '#3bb2d0',
     'circle-stroke-width': 1,
