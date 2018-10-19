@@ -7,13 +7,13 @@ import { createStore, applyMiddleware } from 'redux';
 import logger from 'redux-logger';
 import reducers from './reducers';
 import { loadingBarMiddleware } from 'react-redux-loading-bar';
-import apiClient from './middlewares/api';
+import api from './middlewares/api';
 
 import './index.css';
 import App from './containers/App';
 
 const middlewares = [
-  apiClient,
+  api,
   loadingBarMiddleware({
     promiseTypeSuffixes: ['REQUEST', 'SUCCESS', 'FAILURE']
   })
