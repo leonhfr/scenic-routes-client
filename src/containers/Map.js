@@ -4,9 +4,13 @@ import { connect } from 'react-redux';
 import mapboxgl from 'mapbox-gl';
 
 import { setActiveOption } from '../actions/options.actions';
-import { getRoutes, delRoutes, addWaypoint, delWaypoints }  from '../actions/routes.actions';
+import {
+  getRoutes,
+  delRoutes,
+  addWaypoint,
+  delWaypoints
+} from '../actions/routes.actions';
 
-// import Route from '../components/Route';
 import Position from '../components/Position';
 import Menu from '../components/Menu';
 
@@ -22,10 +26,10 @@ import {
   routesOthersLayer
 } from './Map.config';
 
-mapboxgl.accessToken = 'pk.eyJ1IjoibGVvbmhmciIsImEiOiJjam1icjllY3cxbG03M3BudGQzaWs1Zjk5In0.5u5qyMk6oy4MkkZKW3pbGQ';
+mapboxgl.accessToken =
+  'pk.eyJ1IjoibGVvbmhmciIsImEiOiJjam1icjllY3cxbG03M3BudGQzaWs1Zjk5In0.5u5qyMk6oy4MkkZKW3pbGQ';
 
 class Map extends React.Component {
-
   constructor (props) {
     super(props);
     this.map = {};
@@ -35,8 +39,9 @@ class Map extends React.Component {
   }
 
   componentWillMount () {
-    const p = computeBounds(this.props.bounds.map(Number));
-    const { lng, lat, maxBounds } = p;
+    const { lng, lat, maxBounds } = computeBounds(
+      this.props.bounds.map(Number)
+    );
     this.setState({
       lng,
       lat,
@@ -46,7 +51,6 @@ class Map extends React.Component {
   }
 
   componentDidMount () {
-
     this.map = new mapboxgl.Map({
       container: this.mapContainer,
       style: 'mapbox://styles/mapbox/dark-v9',
@@ -59,7 +63,6 @@ class Map extends React.Component {
     this.map.touchZoomRotate.disableRotation();
 
     this.map.on('load', () => {
-
       this.map.addSource('heatmap', {
         type: 'geojson',
         data: this.props.heatmap
@@ -85,7 +88,7 @@ class Map extends React.Component {
       this.map.addLayer(routesInterestsLayer);
       this.map.addLayer(routesOthersLayer);
 
-      this.map.on('mousemove', (e) => {
+      this.map.on('mousemove', e => {
         if (this.props.active.id === 'scenicRoutes') return;
         const { lng, lat } = e.lngLat;
         this.setState({
@@ -94,7 +97,7 @@ class Map extends React.Component {
         });
       });
 
-      this.map.on('wheel', (e) => {
+      this.map.on('wheel', e => {
         if (this.props.active.id === 'scenicRoutes') return;
         this.setState({
           zoom: this.map.getZoom()
@@ -106,7 +109,7 @@ class Map extends React.Component {
         closeOnClick: false
       });
 
-      this.map.on('mouseenter', 'interests', (e) => {
+      this.map.on('mouseenter', 'interests', e => {
         this.map.getCanvas().style.cursor = 'pointer';
         const coordinates = e.features[0].geometry.coordinates.slice();
         let url = '';
@@ -116,16 +119,19 @@ class Map extends React.Component {
           url = e.features[0].properties.urlc;
         }
         const max = 200;
-        const content = `<img src="${url}" style="display:block;max-width:${max}px;max-height:${max}px;width:auto;height:auto;" alt="Could not fetch image" />${e.features[0].properties.pics} picture(s) here`;
+        const content = `<img src="${url}" style="display:block;max-width:${max}px;max-height:${max}px;width:auto;height:auto;" alt="Could not fetch image" />${
+          e.features[0].properties.pics
+        } picture(s) here`;
         while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
           coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
         }
-        popup.setLngLat(coordinates)
+        popup
+          .setLngLat(coordinates)
           .setHTML(content)
           .addTo(this.map);
       });
 
-      this.map.on('mouseenter', 'scenic-routes-interests', (e) => {
+      this.map.on('mouseenter', 'scenic-routes-interests', e => {
         this.map.getCanvas().style.cursor = 'pointer';
         const coordinates = e.features[0].geometry.coordinates.slice();
         let url = '';
@@ -137,18 +143,22 @@ class Map extends React.Component {
         const max = 200;
         const content = [];
         const imgStyle = `display:block;max-width:${max}px;max-height:${max}px;width:auto;height:auto;`;
-        content.push(`<img src="${url}" style="${imgStyle}" alt="Could not fetch image" />`);
-        if (e.features[0].properties.name) content.push(`<b>${e.features[0].properties.name}</b><br />`);
+        content.push(
+          `<img src="${url}" style="${imgStyle}" alt="Could not fetch image" />`
+        );
+        if (e.features[0].properties.name)
+          content.push(`<b>${e.features[0].properties.name}</b><br />`);
         content.push(`${e.features[0].properties.pics} picture(s) here`);
         while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
           coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
         }
-        popup.setLngLat(coordinates)
+        popup
+          .setLngLat(coordinates)
           .setHTML(content.join(''))
           .addTo(this.map);
       });
 
-      this.map.on('mouseenter', 'scenic-routes-others', (e) => {
+      this.map.on('mouseenter', 'scenic-routes-others', e => {
         this.map.getCanvas().style.cursor = 'pointer';
         const coordinates = e.features[0].geometry.coordinates.slice();
         let url = '';
@@ -160,13 +170,17 @@ class Map extends React.Component {
         const max = 200;
         const content = [];
         const imgStyle = `display:block;max-width:${max}px;max-height:${max}px;width:auto;height:auto;`;
-        content.push(`<img src="${url}" style="${imgStyle}" alt="Could not fetch image" />`);
-        if (e.features[0].properties.name) content.push(`<b>${e.features[0].properties.name}</b><br />`);
+        content.push(
+          `<img src="${url}" style="${imgStyle}" alt="Could not fetch image" />`
+        );
+        if (e.features[0].properties.name)
+          content.push(`<b>${e.features[0].properties.name}</b><br />`);
         content.push(`${e.features[0].properties.pics} picture(s) here`);
         while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
           coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
         }
-        popup.setLngLat(coordinates)
+        popup
+          .setLngLat(coordinates)
           .setHTML(content.join(''))
           .addTo(this.map);
       });
@@ -186,15 +200,14 @@ class Map extends React.Component {
         popup.remove();
       });
 
-      this.map.on('click', (e) => {
+      this.map.on('click', e => {
         if (this.props.active.id !== 'scenicRoutes') return;
         const lenReq = this.props.request.features.length;
         const lenRes = this.props.response.geometry.features.length;
         // Draw A and empty previous response object
         if (lenRes > 0) {
           this.props.delRoutes();
-        }
-        else if (lenReq === 0) {
+        } else if (lenReq === 0) {
           this.props.addWaypoint(e.lngLat);
         }
         // Draw B and make request, then empty request
@@ -211,16 +224,17 @@ class Map extends React.Component {
 
   componentDidUpdate () {
     this.setVisibility();
-    this.map
-      .getSource('scenic-routes-request')
-      .setData(this.props.request);
+    this.map.getSource('scenic-routes-request').setData(this.props.request);
     this.map
       .getSource('scenic-routes-response')
       .setData(this.props.response.geometry);
-    if (!this.props.request.features.length &&
-        this.props.response.geometry.features.length &&
-        this.props.active.id !=='heatmap') {
-      const routeCoords = this.props.response.geometry.features[0].geometry.coordinates;
+    if (
+      !this.props.request.features.length &&
+      this.props.response.geometry.features.length &&
+      this.props.active.id !== 'heatmap'
+    ) {
+      const routeCoords = this.props.response.geometry.features[0].geometry
+        .coordinates;
       const bounds = routeCoords.reduce((bounds, coords) => {
         return bounds.extend(coords);
       }, new mapboxgl.LngLatBounds(routeCoords[0], routeCoords[0]));
@@ -228,7 +242,6 @@ class Map extends React.Component {
         padding: 60
       });
     }
-
   }
 
   setVisibility () {
@@ -255,7 +268,10 @@ class Map extends React.Component {
           active={this.props.active}
           onChange={this.props.setActiveOption}
         />
-        <div ref={el => this.mapContainer = el} className="fixed top right left bottom" />
+        <div
+          ref={el => (this.mapContainer = el)}
+          className="fixed top right left bottom"
+        />
       </div>
     );
   }
@@ -277,7 +293,7 @@ Map.propTypes = {
   delWaypoints: PropTypes.func.isRequired
 };
 
-const mapStateToProps = (state) => ({
+const mapStateToProps = state => ({
   bounds: state.geojson.bounds,
   heatmap: state.geojson.heatmap,
   interests: state.geojson.interests,
@@ -288,12 +304,15 @@ const mapStateToProps = (state) => ({
   response: state.routes.response
 });
 
-const mapDispatchToProps = (dispatch) => ({
-  setActiveOption: (option) => dispatch(setActiveOption(option)),
-  getRoutes: (data) => dispatch(getRoutes(data)),
+const mapDispatchToProps = dispatch => ({
+  setActiveOption: option => dispatch(setActiveOption(option)),
+  getRoutes: data => dispatch(getRoutes(data)),
   delRoutes: () => dispatch(delRoutes()),
-  addWaypoint: (waypoint) => dispatch(addWaypoint(waypoint)),
+  addWaypoint: waypoint => dispatch(addWaypoint(waypoint)),
   delWaypoints: () => dispatch(delWaypoints())
 });
 
-export default connect(mapStateToProps, mapDispatchToProps)(Map);
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(Map);

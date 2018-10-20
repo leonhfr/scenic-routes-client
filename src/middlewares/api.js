@@ -34,9 +34,6 @@ export default store => next => action => {
     type: `${action.type}_REQUEST`
   });
 
-  //eslint-disable-next-line
-  console.log('fetch', BASE_URL + endpoint);
-
   fetch(`${BASE_URL}${endpoint}`, {
     method: method || 'GET',
     body,
