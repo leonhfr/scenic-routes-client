@@ -1,4 +1,9 @@
-const BASE_URL = 'http://localhost:4000';
+// const BASE_URL =
+//   process.env.NODE_ENV !== 'production'
+//     ? 'http://localhost:4000'
+//     : 'https://scenicroutes.herokuapp.com';
+
+const BASE_URL = 'https://scenicroutes.herokuapp.com';
 
 export default store => next => action => {
   if (!action.api) return next(action);
@@ -14,7 +19,7 @@ export default store => next => action => {
 
   headers = {
     ...defaultHeaders,
-    ...headers,
+    ...headers
   };
 
   next({
@@ -25,7 +30,7 @@ export default store => next => action => {
   fetch(`${BASE_URL}${endpoint}`, {
     method: method || 'GET',
     body,
-    headers,
+    headers
   })
     .then(response => response.json())
     .then(data => {
@@ -33,7 +38,7 @@ export default store => next => action => {
         ...action,
         type: `${action.type}_SUCCESS`,
         api: undefined,
-        data,
+        data
       });
     })
     .catch(error => {
@@ -41,7 +46,7 @@ export default store => next => action => {
         ...action,
         type: `${action.type}_FAILURE`,
         api: undefined,
-        error,
+        error
       });
     });
 };
