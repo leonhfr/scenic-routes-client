@@ -28,7 +28,7 @@
   "bugs": {
     "url": "https://github.com/leonhfr/scenic-routes-client/issues"
   },
-  "homepage": "https://leonhfr.github.io/scenic-routes-client",
+  "homepage": "https://leonhfr.github.io/",
   "dependencies": {
     "connected-react-router": "^4.4.1",
     "gh-pages": "^2.0.1",
