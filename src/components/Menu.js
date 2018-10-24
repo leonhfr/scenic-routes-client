@@ -20,7 +20,7 @@ function Menu (props) {
           </a>
         </div>
         <ReactTooltip id={`tooltip${i}`} place="bottom" type="light" effect="solid">
-          <div style={{maxWidth:'300px',textAlign:'left'}}>{option.tooltip}</div>
+          <div style={{maxWidth:'300px',textAlign:'left',textSize:'10px',lineHeight:'20px'}}>{option.tooltip}</div>
         </ReactTooltip>
       </label>
     );
